@@ -18,16 +18,8 @@ class Tester {
   }
 }
 
-object Name extends ColDef[String] {
-  override val column = 0
-  override def xlsRead(cell: Cell): String =
-    cell match {
-      case c: Text => c.asString
-      case _ => ???
-    }
-  override def xlsWrite(s: String): Cell = ???
-  override def csvRead(s: String): String = ???
-  override def csvWrite(s: String): String = ???
+object Name extends ColSpec(2) with TextXlsRdColDef[String] {
+  override def xlsReadText(tc: Text): String = tc.asString
 }
 
 object TestData {
@@ -37,6 +29,7 @@ object TestData {
 
   val players = Seq(alice, bob, cecil)
   val names = players.map(_.name)
+  val averages = players.map(_.average)
 }
 
 case class Player(
