@@ -11,6 +11,10 @@ trait TableReader[TargetT] {
 
 }
 
+object TableReader {
+  def apply[TargetT](init: TargetT) = EmptyTableReader(init)
+}
+
 case class EmptyTableReader[TargetT](init: TargetT) extends TableReader[TargetT] {
   override def read(row: Seq[Cell]): TargetT = init
 }
@@ -22,8 +26,8 @@ case class TableReaderImpl[PrevTargetT, CellValueT, TargetT](
   convertCellValue: PrevTargetT => CellValueT => TargetT) extends TableReader[TargetT] {
 
   override def read(row: Seq[Cell]): TargetT = {
-    val content = converter.convert(row(columnNumber))
     val prev = prevTableReader.read(row)
+    val content = converter.convert(row(columnNumber))
     convertCellValue(prev)(content)
   }
 }

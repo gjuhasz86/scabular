@@ -19,11 +19,20 @@ object Text {
   val AsString = Text(_.asString)
 }
 object Num {
-  def apply[T](convert: NumericCell => T): CellConverter[T] = {
+  def apply[T](convert: NumCell => T): CellConverter[T] = {
     GenericCellConverter {
-      case c: NumericCell => convert(c)
+      case c: NumCell => convert(c)
       case c => throw new IllegalArgumentException(s"Unexpected cell type ${c.cellType}")
     }
   }
   val AsInt = Num(_.asInt)
+}
+object Bool {
+  def apply[T](convert: BoolCell => T): CellConverter[T] = {
+    GenericCellConverter {
+      case c: BoolCell => convert(c)
+      case c => throw new IllegalArgumentException(s"Unexpected cell type ${c.cellType}")
+    }
+  }
+  val AsBoolean = Bool(_.asBool)
 }
