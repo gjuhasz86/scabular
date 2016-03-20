@@ -4,8 +4,13 @@ trait TableReader[TargetT] {
   def col[CellValueT, NewTargetT](
     columnNumber: Int,
     converter: CellConverter[CellValueT])(
-      convertCellValue: TargetT => CellValueT => NewTargetT): TableReader[NewTargetT] =
-    TableReaderImpl(this, columnNumber, converter, convertCellValue)
+      convertCellValue: TargetT => CellValueT => NewTargetT): TableReader[NewTargetT] = {
+
+    val toTarget: TargetT => Cell => NewTargetT =
+      (tgt: TargetT) => (c: Cell) => convertCellValue(tgt)(converter.convert(c))
+
+    TableReaderImpl(this, columnNumber, toTarget)
+  }
 
   def read(row: Seq[Cell]): TargetT
 
@@ -22,12 +27,10 @@ case class EmptyTableReader[TargetT](init: TargetT) extends TableReader[TargetT]
 case class TableReaderImpl[PrevTargetT, CellValueT, TargetT](
   prevTableReader: TableReader[PrevTargetT],
   columnNumber: Int,
-  converter: CellConverter[CellValueT],
-  convertCellValue: PrevTargetT => CellValueT => TargetT) extends TableReader[TargetT] {
+  convertCellValue: PrevTargetT => Cell => TargetT) extends TableReader[TargetT] {
 
   override def read(row: Seq[Cell]): TargetT = {
     val prev = prevTableReader.read(row)
-    val content = converter.convert(row(columnNumber))
-    convertCellValue(prev)(content)
+    convertCellValue(prev)(row(columnNumber))
   }
 }
