@@ -9,6 +9,11 @@ case class GenericCellConverter[T](conv: Cell => T) extends CellConverter[T] {
 
 }
 
+object DefaultConverters {
+  implicit val convString = Text.AsString
+  implicit val convInt = Num.AsInt
+  implicit val convBoolean = Bool.AsBoolean
+}
 object Text {
   def apply[T](convert: TextCell => T): CellConverter[T] = {
     GenericCellConverter {

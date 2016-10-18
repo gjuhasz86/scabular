@@ -12,6 +12,17 @@ trait TableReader[TargetT] {
     TableReaderImpl(this, columnNumber, toTarget)
   }
 
+  def col[CellValueT, NewTargetT](
+    columnNumber: Int)(
+      convertCellValue: TargetT => CellValueT => NewTargetT)(
+        implicit converter: CellConverter[CellValueT]) = {
+    
+    val toTarget: TargetT => Cell => NewTargetT =
+      (tgt: TargetT) => (c: Cell) => convertCellValue(tgt)(converter.convert(c))
+
+    TableReaderImpl(this, columnNumber, toTarget)
+  }
+
   def read(row: Seq[Cell]): TargetT
 
 }
